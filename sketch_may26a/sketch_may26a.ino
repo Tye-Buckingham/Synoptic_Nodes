@@ -1,13 +1,18 @@
-//************************************************************
-// building on the painlessMesh server example to create a node system
-// that transfer data readings as a string, with one node acting as the bridge (this file)
-// in the form of a HTTP server. using a ticket system to handle multiple requests.
-// https://gitlab.com/painlessMesh/painlessMesh/wikis/bridge-between-mesh-and-another-network
-// for more details about my version
-// https://gitlab.com/Assassynv__V/painlessMesh
-// and for more details about the AsyncWebserver library
-// https://github.com/me-no-dev/ESPAsyncWebServer
-//************************************************************
+/**
+  ******************************************************************************
+  * @file    bridge_node.ino
+  * @author  T. Buckingham
+  * @brief   Sketch file for the bridge node of the mesh network using HTTP requests
+  *           with a ticket system [see readings_node.ino] for 
+  *
+  *          The file contains ::
+  *           + Functions for querying nodes and handling user requests
+	*						+ Testing html to be used without a client program
+  *
+  * FOR MORE DETAILS ON LIBRARIES OR EXAMPLES USED PLEASE SEE THE README
+  *
+  ******************************************************************************
+  */
 
 #include "IPAddress.h"
 #include "painlessMesh.h"

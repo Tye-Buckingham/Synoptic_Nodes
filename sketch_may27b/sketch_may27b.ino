@@ -1,42 +1,54 @@
-/*
-  Rui Santos
-  Complete project details at https://RandomNerdTutorials.com/esp-mesh-esp32-esp8266-painlessmesh/
-  
-  This is a simple example that uses the painlessMesh library: https://github.com/gmag11/painlessMesh/blob/master/examples/basic/basic.ino
-*/
+/**
+  ******************************************************************************
+  * @file    readings_node.ino
+  * @author  T. Buckingham
+  * @brief   Sketch file for children nodes that record and send readings to the 
+  *           user via the bridge [see bridge_node.ino]
+  *
+  *          The file contains ::
+  *           + Functions for handling requests and responding to the bridge
+	*						+ Node specific details such as its string name     
+  *
+  * FOR MORE DETAILS ON LIBRARIES OR EXAMPLES USED PLEASE SEE THE README
+  *
+  ******************************************************************************
+  */
 
-#include "painlessMesh.h"
-#include "namedMesh.h"
+/*-- Includes --*/
 
-#include <ArduinoJson.h>
-#include <SD.h>
-#include <SPI.h>
+#include "painlessMesh.h"   // Mesh network header
+#include "namedMesh.h"      // Mesh network with names implemented - see Nodes GitHub version for any changes
+
+#include <ArduinoJson.h>    // JSON parsing and encoding
+#include <SD.h>             // SD Storage header
+#include <SPI.h>            // Serial Peripheral Interface
+
+/*-- Global Definitions --*/
 
 #define   MESH_PREFIX     "whateverYouLike"
 #define   MESH_PASSWORD   "somethingSneaky"
 #define   MESH_PORT       5555
 
-Scheduler userScheduler; // to control your personal task
-namedMesh  mesh;
+/*-- Global Variables --*/
+// Scheduler userScheduler;
 
-String nodeName = "lobitos";
+namedMesh  mesh;                /* namedMesh network class, used to interface with the network */
+String nodeName = "lobitos";                   /* Name for this specific node */
 
+/*-- Prototypes --*/
 
-// User stub
-void sendMessage() ; // Prototype so PlatformIO doesn't complain
-void sendReadings(unsigned char ticket_number);
+/** @brief Function used to send stored readings as a string to the bridge node when the user requests
+ *  @param Void.
+ *  @return Void.
+ */
+void sendReadings(unsigned char ticket_number); 
 
+/** @brief Basic function used to test the connections between the root during development
+ *  @param Void.
+ *  @return Void.
+ */
+void sendMessage() ;              
 
-//Task taskSendMessage( TASK_SECOND * 1 , TASK_FOREVER, &sendMessage );
-
-void sendMessage() 
-{
-  String msg = "Hi from node1";
-  msg += mesh.getNodeId();
-  String to = "root";
-  mesh.sendSingle(to, msg);
-  //taskSendMessage.setInterval( random( TASK_SECOND * 1, TASK_SECOND * 5 ));
-}
 
 void sendReadings(unsigned char ticket_number)
 {
@@ -57,19 +69,17 @@ void sendReadings(unsigned char ticket_number)
 
 }
 
-void newConnectionCallback(uint32_t nodeId) 
+void sendMessage() 
+{
+  String msg = "Hi from node1";
+  msg += mesh.getNodeId();
+  String to = "root";
+  mesh.sendSingle(to, msg);
+}
+
+void newConnectionCallback(uint32_t nodeId) // when new node gets connected alert program?
 {
     Serial.printf("--> startHere: New Connection, nodeId = %u\n", nodeId);
-}
-
-void changedConnectionCallback() 
-{
-  Serial.printf("Changed connections\n");
-}
-
-void nodeTimeAdjustedCallback(int32_t offset) 
-{
-    Serial.printf("Adjusted time %u. Offset = %d\n", mesh.getNodeTime(),offset);
 }
 
 void setup() 
@@ -89,13 +99,6 @@ void setup()
     mesh.sendSingle(from, reply);
     Serial.printf("Received message by name from: %s, %s\n", from.c_str(), msg.c_str());
   });
-
-}
-
-void sendReadings()
-{
-
-
 
 }
 
