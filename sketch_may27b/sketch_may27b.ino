@@ -30,7 +30,7 @@
 #define   MESH_PORT       5555
 
 /*-- Global Variables --*/
-// Scheduler userScheduler;
+Scheduler userScheduler;
 
 namedMesh  mesh;                /* namedMesh network class, used to interface with the network */
 String nodeName = "lobitos";                   /* Name for this specific node */
@@ -95,8 +95,27 @@ void setup()
 
   mesh.onReceive([](String &from, String &msg) 
   {
-    String reply = "hello from lobitos, i got " + msg;
-    mesh.sendSingle(from, reply);
+    // ticket_num:message - message can be READINGS, ERRORS, SETTINGS
+    char buffer[4];
+    unsigned char i = 0;
+    unsigned char j = 0;
+    while(msg.c_str()[i] != ':') { // ticket number
+        buffer[i] = msg.c_str()[i];
+        i++;
+    }
+    buffer[i] = '\0';
+    unsigned char ticket_num =(unsigned char)sscanf(buffer, "%d", &i);
+
+    if(msg.indexOf("READINGS") != -1) {
+      sendReadings(ticket_num);
+    } else if(msg.indexOf("ERRORS") != -1) {
+
+    } else if(msg.indexOf("SETTINGS") != -1) {
+
+    } else {
+      String reply = "hello from lobitos, i got " + msg;
+      mesh.sendSingle(from, reply); 
+    }
     Serial.printf("Received message by name from: %s, %s\n", from.c_str(), msg.c_str());
   });
 

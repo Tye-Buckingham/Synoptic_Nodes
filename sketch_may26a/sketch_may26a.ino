@@ -19,6 +19,7 @@
 #include "IPAddress.h"         // IP address handling
 #include "painlessMesh.h"      // Mesh network header
 #include "namedMesh.h"         // Mesh network with names implemented - see Nodes GitHub version for any changes
+#include <map>                 // C++ map
 
 #ifdef ESP8266
 #include "Hash.h"
@@ -34,8 +35,8 @@
 #define   MESH_PASSWORD   "somethingSneaky"
 #define   MESH_PORT       5555
 
-#define   STATION_SSID     "*****"
-#define   STATION_PASSWORD "*****"
+#define   STATION_SSID     "****"
+#define   STATION_PASSWORD "****"
 
 #define HOSTNAME "HTTP_BRIDGE"
 
@@ -91,23 +92,21 @@ void setup()
 
   server.on("/request", HTTP_GET, [](AsyncWebServerRequest *request)
   {
-    request->send(200, "text/html", "<form>Text to Broadcast<br><input type='text' name='NODE'><br><br><input type='text' name='BROADCAST'><br><br><input type='submit' value='Submit'></form>");
+    //request->send(200, "text/html", "<form>Text to Broadcast<br><input type='text' name='NODE'><br><br><input type='text' name='BROADCAST'><br><br><input type='submit' value='Submit'><br><br><p></p></form>");
     if (request->hasArg("BROADCAST")){
-      String msg = request->arg("BROADCAST");
+      current_ticket++;
+      String msg = String(current_ticket);
       String node = request->arg("NODE");
+      msg += ":";
+      msg += request->arg("BROADCAST");
       mesh.sendSingle(node, msg);
       //t1.setInterval(random( TASK_SECOND * 1, TASK_SECOND * 5 ));
-      int period = 3000;
-      unsigned long time_now = 0;
-      time_now = millis();
-      while(millis() < time_now + period){
-        //wait approx. [period] ms
-      }
-      Serial.println(node_reply);
-      current_ticket++;
+      
+      //request->send(200, "text/html", "<form>Text to Broadcast<br><input type='text' name='NODE'><br><br><input type='text' name='BROADCAST'><br><br><input type='submit' value='Submit'><br><br><p>"+ String(current_ticket) +"</p></form>");
       request->send(200, "text/plain", String(current_ticket));
       String empty = "";
       client_requests.insert({current_ticket, empty});
+      Serial.println(node_reply);
     } else {
       request->send(404, "text/plain", "Invalid");
     }
@@ -121,10 +120,19 @@ void setup()
 
   server.on("/get-request", HTTP_GET, [](AsyncWebServerRequest *request)
   {
-    request->send(200, "text/html", "<form>Text to Broadcast<br><input type='text' name='TICKET'><br><br><input type='submit' value='Submit'></form>");
-     if (request->hasArg("TICKET")){
+    //request->send(200, "text/html", "<form>Text to Broadcast<br><input type='text' name='TICKET'><br><br><input type='submit' value='Submit'></form>");
+    if (request->hasArg("TICKET")){
       unsigned char client_request = (unsigned char) request->arg("TICKET").toInt();
-      request->send(200, "text/plain", client_requests[client_request]);
+      auto search = client_requests.find(client_request);
+       if(search != client_requests.end()) {
+         if(client_requests[client_request] != "") {
+            request->send(200, "text/plain", client_requests[client_request]);
+         } else {
+            request->send(200, "text/plain", "request not ready");
+         }
+       } else {
+         request->send(200, "text/plain", "ticket not found");
+       }
       client_requests.erase(client_request);
      }
   });
