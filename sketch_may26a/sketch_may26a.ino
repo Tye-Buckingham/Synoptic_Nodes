@@ -14,17 +14,21 @@
   ******************************************************************************
   */
 
-#include "IPAddress.h"
-#include "painlessMesh.h"
-#include "namedMesh.h"
+/*-- Includes --*/
+
+#include "IPAddress.h"         // IP address handling
+#include "painlessMesh.h"      // Mesh network header
+#include "namedMesh.h"         // Mesh network with names implemented - see Nodes GitHub version for any changes
 
 #ifdef ESP8266
 #include "Hash.h"
 #include <ESPAsyncTCP.h>
 #else
-#include <AsyncTCP.h>
+#include <AsyncTCP.h>           // Async handling header
 #endif
-#include <ESPAsyncWebServer.h>
+#include <ESPAsyncWebServer.h>  // Web server header
+
+/*-- Global Definitions --*/
 
 #define   MESH_PREFIX     "whateverYouLike"
 #define   MESH_PASSWORD   "somethingSneaky"
@@ -34,36 +38,35 @@
 #define   STATION_PASSWORD "*****"
 
 #define HOSTNAME "HTTP_BRIDGE"
-int returned = 0;
-String from_node;
-String node_reply;
-std::map<unsigned char, String> client_requests;
+
+/*-- Global Variables --*/
+       
+String from_node;                  /* What node replied [may no longer be use in later in development] */
+String node_reply;              /* What the node replied  [may no longer be use in later in development] */
+std::map<unsigned char, String> client_requests;  /* Maps the ticket number to the reply */
+namedMesh  mesh;                      /* namedMesh network class, used to interface with the network */
+String nodeName = "root";                             /* Name for this specific node */
+unsigned char current_ticket = 0;               /* Current ticket number to give to requests */
+
+/*-- Prototypes --*/
 
 //void receivedCallback( const uint32_t &from, const String &msg );
 IPAddress getlocalIP();
-
-namedMesh  mesh;
-
-String nodeName = "root";
-unsigned char current_ticket = 0;
-
 AsyncWebServer server(80);
 IPAddress myIP(0,0,0,0);
 IPAddress myAPIP(0,0,0,0);
 
 void setup() 
 {
+  // Serial and mesh init
   Serial.begin(115200);
-
   mesh.setDebugMsgTypes( ERROR | STARTUP | CONNECTION );  // set before init() so that you can see startup messages
-
   mesh.init( MESH_PREFIX, MESH_PASSWORD, MESH_PORT, WIFI_AP_STA, 6 );
-
   mesh.setName(nodeName);
  
 
   //mesh.onReceive(&receivedCallback);
-  mesh.onReceive([](String &from, String &msg) {
+  mesh.onReceive([](String &from, String &msg) { // add node reply to the map
       from_node  = from; 
       node_reply = msg;
       char buffer[4];
@@ -77,10 +80,10 @@ void setup()
       Serial.printf("bridge: Received from %u msg=%s\n", from, msg.c_str());
   });
 
-  mesh.stationManual(STATION_SSID, STATION_PASSWORD);
+  mesh.stationManual(STATION_SSID, STATION_PASSWORD); // connect to network outside of mesh
   mesh.setHostname(HOSTNAME);
 
-  mesh.setRoot(true);
+  mesh.setRoot(true); // bridge should be root
   mesh.setContainsRoot(true);
 
   myAPIP = IPAddress(mesh.getAPIP());
