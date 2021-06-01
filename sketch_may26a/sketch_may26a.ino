@@ -192,7 +192,7 @@ void setup()
       return request->requestAuthentication();
     }
       auto nodes = mesh.getNodeList(true);
-      String str;
+      String str = "";
       for (auto &&id : nodes) {
         str += "ID:" + String(id) + String(",Name:");
         for (auto && pr : mesh.getnameMap()) {
