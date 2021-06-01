@@ -21,6 +21,7 @@
 
 #include <SD.h>             // SD Storage header
 #include <SPI.h>            // Serial Peripheral Interface
+#include <TimeLib.h>        // Arduino time library
 
 /*-- Global Definitions --*/
 
@@ -75,11 +76,6 @@ void sendMessage()
   mesh.sendSingle(to, msg);
 }
 
-void newConnectionCallback(uint32_t nodeId) // when new node gets connected alert program?
-{
-    Serial.printf("--> startHere: New Connection, nodeId = %u\n", nodeId);
-}
-
 void setup() 
 {
   Serial.begin(115200);
@@ -90,43 +86,50 @@ void setup()
   mesh.init( MESH_PREFIX, MESH_PASSWORD, &userScheduler, MESH_PORT );
 
   mesh.setName(nodeName); 
+  //mesh.onReceive(&receivedCallback);
 
   mesh.onReceive([](String &from, String &msg) 
   {
-    // ticket_num:message - message can be READINGS, ERRORS, SETTINGS
-    char buffer[4];
-    char* str;
-    unsigned char i = 0;
-    unsigned char j = 0;
-    while(msg.c_str()[i] != ':') { // ticket number
-        buffer[i] = msg.c_str()[i];
-        i++;
-    }
-    buffer[i] = '\0';
-    int ticket_num = 0;
-    sscanf(buffer, "%d", &ticket_num);
-    Serial.print("Buffer: ");
-    Serial.println(buffer);
-    Serial.println("Ticket num: " + String(ticket_num));
-    if(msg.indexOf("READINGS") != -1) {
-      sendReadings((unsigned char)ticket_num);
-    } else if(msg.indexOf("ERRORS") != -1) {
-
-    } else if(msg.indexOf("SETTINGS") != -1) {
-
+    //Serial.printf("Received message by name from: %s, %s\n", from.c_str(), msg.c_str());
+    if(msg.c_str()[0] == 'T') {
+      char* ptr;
+      char* temp = (char*)malloc((msg.length())*sizeof(char*));
+      msg.remove(0, 1);
+      msg.toCharArray(temp, msg.length() + 1);
+      time_t new_time = strtoul(temp, &ptr, 10);
+      setTime(new_time);
     } else {
-      String reply = "hello from lobitos, i got " + msg;
-      mesh.sendSingle(from, reply); 
+      // ticket_num:message - message can be READINGS, ERRORS, SETTINGS
+      char buffer[4];
+      char* str;
+      unsigned char i = 0;
+      unsigned char j = 0;
+      while(msg.c_str()[i] != ':') { // ticket number
+          buffer[i] = msg.c_str()[i];
+          i++;
+      }
+      buffer[i] = '\0';
+      int ticket_num = 0;
+      sscanf(buffer, "%d", &ticket_num);
+      if(msg.indexOf("READINGS") != -1) {
+        sendReadings((unsigned char)ticket_num);
+      } else if(msg.indexOf("ERRORS") != -1) {
+
+      } else if(msg.indexOf("SETTINGS") != -1) {
+
+      } else {
+        String reply = "hello from lobitos, i got " + msg;
+        mesh.sendSingle(from, reply); 
+      }
     }
-    Serial.printf("Received message by name from: %s, %s\n", from.c_str(), msg.c_str());
+    //Serial.print("Now: ");
+    //Serial.println(now());
+    
   });
 
 }
 
-//void receivedCallback( const uint32_t &from, const String &msg ) {
-  //String rep = "High from lobitos";
-  //mesh.sendSingle(from, rep);
-//}
+
 
 void loop() 
 {

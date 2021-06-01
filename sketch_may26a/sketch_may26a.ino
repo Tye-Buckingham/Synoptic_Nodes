@@ -21,6 +21,7 @@
 #include "namedMesh.h"         // Mesh network with names implemented - see Nodes GitHub version for any changes
 #include <map>                 // C++ map
 #include <ArduinoJson.h>       // JSON parsing and encoding
+#include <TimeLib.h>           // Arduino time library
 
 #ifdef ESP8266
 #include "Hash.h"
@@ -114,7 +115,6 @@ void setup()
       msg += request->arg("BROADCAST");
       mesh.sendSingle(node, msg);
       //t1.setInterval(random( TASK_SECOND * 1, TASK_SECOND * 5 ));
-      
       //request->send(200, "text/html", "<form>Text to Broadcast<br><input type='text' name='NODE'><br><br><input type='text' name='BROADCAST'><br><br><input type='submit' value='Submit'><br><br><p>"+ String(current_ticket) +"</p></form>");
       request->send(200, "text/plain", String(current_ticket));
       client_requests.insert({current_ticket, empty});
@@ -132,7 +132,7 @@ void setup()
   server.on("/check", HTTP_GET, [](AsyncWebServerRequest *request)
   {
     if(!request->authenticate(client_username, client_password)) {
-      request->redirect("/request");
+      return request->requestAuthentication();
     }
     String tickets = "";
     for(auto const& pr : client_requests) {
@@ -142,14 +142,35 @@ void setup()
     request->send(200, "text/plain", tickets);
   });
 
+  server.on("/time", HTTP_GET, [](AsyncWebServerRequest *request)
+  {
+    if(!request->authenticate(client_username, client_password)) {
+      return request->requestAuthentication();
+    }
+    if (request->hasArg("TIME")){
+      String message = "T" + request->arg("TIME");
+      mesh.sendBroadcast(message);
+
+      String msg = request->arg("TIME");
+      char* ptr;
+      char* temp = (char*)malloc((msg.length())*sizeof(char*));
+      msg.toCharArray(temp, msg.length() + 1);
+      time_t new_time = strtoul(temp, &ptr, 10);
+      setTime(new_time);
+      request->send(200, "text/plain", "given_time: " + msg + " - time adjust to: " + now());
+    } else {
+      request->send(200, "text/plain", "please provide time");
+    }
+  });
+
   server.on("/get-request", HTTP_GET, [](AsyncWebServerRequest *request)
   {
-    if(!request->authenticate(client_username, client_password))
-      request->redirect("/request");
+    if(!request->authenticate(client_username, client_password)) {
+      return request->requestAuthentication();
+    }
     //request->send(200, "text/html", "<form>Text to Broadcast<br><input type='text' name='TICKET'><br><br><input type='submit' value='Submit'></form>");
     if(request->hasArg("TICKET")){
       unsigned char client_request = (unsigned char) request->arg("TICKET").toInt();
-      Serial.println(client_request);
       auto search = client_requests.find(client_request);
        if(search != client_requests.end()) {
          if(!(client_requests[client_request].equals(""))) {
@@ -167,8 +188,9 @@ void setup()
 
   server.on("/nodes", HTTP_GET, [](AsyncWebServerRequest *request)
   {
-    if(!request->authenticate(client_username, client_password))
-      request->redirect("/request");
+    if(!request->authenticate(client_username, client_password)) {
+      return request->requestAuthentication();
+    }
       auto nodes = mesh.getNodeList(true);
       String str;
       for (auto &&id : nodes) {
@@ -196,13 +218,6 @@ void loop()
     Serial.println("My IP is " + myIP.toString());
   }
 }
-
-//void receivedCallback( const uint32_t &from, const String &msg ) 
-//{
-//  from_node  = from; 
-//  node_reply = msg;
-//  Serial.printf("bridge: Received from %u msg=%s\n", from, msg.c_str());
-//}
 
 IPAddress getlocalIP() 
 {
