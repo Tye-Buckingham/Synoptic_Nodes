@@ -41,6 +41,7 @@ Time keeping is done through the client upon connection and at regular intervals
 + /nodes       :: returns a list of all currently connected nodes with their ID and their name.
 + /get-request :: once a request has been made the user will provide the ticket number they where given, and if the request is ready the data will be sent to the client.
 
+-----
 
 When a request is made the ticket number is added to a map with an empty string, once the request has been retrieved by the client the map entry is erased.
 This allows the server to tell the user if the request has not been made (or not present), or if the request has not been processed yet.
