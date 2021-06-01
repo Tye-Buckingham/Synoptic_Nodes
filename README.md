@@ -1,7 +1,7 @@
 # Synoptic_Nodes
  Node System for Synoptic Project
 
-+ Node connection system using a root node as a web server and children nodes as data logging nodes. 
++ Node connection system using a root node as a web server and children nodes as data logging nodes. The requests can be made through a browser or any HTTP client, an example java client is provided. The requests use a ticket system for retrieving the request. 
 
 + Using the following repos :: 
     - painlessMesh      :: https://gitlab.com/painlessMesh/painlessMesh/-/tree/master/
