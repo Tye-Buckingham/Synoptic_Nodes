@@ -1,0 +1,78 @@
+* Synoptic_Nodes
+Node System for Synoptic Project
+
++ Node connection system using a root node as a web server and children nodes as data logging nodes. The requests can be made through a browser or any HTTP client, an example java client is provided. The requests use a ticket system for retrieving the request.
+
+** TODO List (01/06/20)
++ [ ] Dummy sensor reading
++ [ ] Store sensor readings onto SD card
++ [ ] Error and settings requests
+
+** How to use
+
+*** Nodes
+
+One node is to be setup with the 26a sketch (this will be the root/bridge node) and all others will use the 27b sketch.
+The code will work with a ESP32 or ESP8266 so long as the correct libraries have been installed, a list of some can be found below however,
+may not be as these are easy to find within the Arduino IDE and may be pre-installed already. \\
+The root node will act as a HTTP server allowing use through a web browser or in this case a Java client. The bridge is unable to wait for requests
+to be returned so a ticket system has been implemented to keep track of requests.\\
+Time keeping is done through the client upon connection and at regular intervals, this helps keep the mesh in sync when recording data.
+
+
+*** HTTP server requests
+
+#+begin_src org :eval never-export
+*/request*     will take a node name and a message to send to the node [READINGS, ERRORS, SETTINGS], increment the ticket and return the ticket to the client. The request will be added to a map with a blank String field.\\
+*/check*       will iterate over the requests map to give the client a list of currently active requests so the client can check if the request was successful.\\
+*/time*        sends the node a timestamp to be broadcast of the network to sync their clocks for logging data.\\
+*/nodes*       returns a list of all currently connected nodes with their ID and their name.\\
+*/get-request* once a request has been made the user will provide the ticket number they where given and if the request is ready the data will be sent to the client.\\
+#+end_src
+
+When a request is made the ticket number is added to a map with an empty string, once the request has been retrieved by the client the map entry is erased.
+This allows the server to tell the user if the request has not been made (or not present), or if the request has not been processed yet.
+
+*** Request and response formatting
+
+All data transferred between nodes is through a formatted string which can then be parsed within the JAVA program, full descriptions of formatting is described in the .java example.
++ */time*'s TIME argument is formatted to the logging node such 'T[unix_timestamp]'
++ */get-request*'s response will be formatted such [ticket_number]:[data{timestamp,reading1,reading2,reading3}:{timestamp,reading1,reading2,reading3}]
+This saves the nodes time and memory when handling requests and leaves the parsing to the client.
+
+
+*** Client
+
+The client example is provided in Java but a web browser will work just fine. The client will need to authenticate with the stored username and password
+in order to make requests. The requests follow a standard HTTP request
+
++ /time requires a unix timestamp with the argument named *TIME*
+#+begin_src java
+long ut1 = Instant.now().getEpochSecond();
+String time = "http://192.168.1.103/time?TIME="+ut1;
+#+end_src
++ /request requires a node name (use /nodes to get all active nodes) and a type of request as *NODE* and *BROADCAST* respectively.
+#+begin_src java
+String NODE = "lobitos";
+String BROADCAST = "READINGS";
+String request = "http://[server_node_IP]/request?NODE="+NODE+"&BROADCAST="+BROADCAST;
+#+end_src
++ /get-request the user needs to store the reponse from the above request and provide this as the *TICKET* argument
+#+begin_src java
+String get_request = "http://[server_node_IP]/get-request?TICKET="+TICKET;
+#+end_src
+
+All responses are in 'text/plain' so the Java client can easily capture and read using an ~InputStream~ and ~BufferedReader~.
+
+** Using the following repos ::
+
+| painlessMesh      | https://gitlab.com/painlessMesh/painlessMesh/-/tree/master/                   | Easy to setup and use self managing mesh network - /see this repos version for any changes/       |
+| namedMesh         | https://gitlab.com/painlessMesh/painlessMesh/-/tree/master/examples/namedMesh | Built on painlessMesh by adding a method to send messages to nodes using a user friendly set name |
+| ESPAsyncWebServer | https://github.com/me-no-dev/ESPAsyncWebServer                                | Used to build the web server bridge node for interfacing with the mesh network                    |
+| Heltec_ESP32      | https://github.com/HelTecAutomation/Heltec_ESP32                              | ESP32 library specific to the family of board used however, other ESP32s will work the same       |
+
+
+** The following guides were used in research and development ::
+
+| WebServer with Auth | https://randomnerdtutorials.com/esp32-esp8266-web-server-http-authentication/ | Tutorial showing how to setup an ESP web server authentication                             |
+| PainlessMesh        | https://gitlab.com/painlessMesh/painlessMesh/-/blob/master/examples/          | Examples provided by the painlessMesh github used to build the web server and mesh network |
