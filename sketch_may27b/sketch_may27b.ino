@@ -19,7 +19,6 @@
 #include "painlessMesh.h"   // Mesh network header
 #include "namedMesh.h"      // Mesh network with names implemented - see Nodes GitHub version for any changes
 
-#include <ArduinoJson.h>    // JSON parsing and encoding
 #include <SD.h>             // SD Storage header
 #include <SPI.h>            // Serial Peripheral Interface
 
@@ -66,7 +65,6 @@ void sendReadings(unsigned char ticket_number)
   String root = "root";
   String readings = String(ticket_number) + ":" + "1622119135383,9.214,3.45453,1.3424:1622119135383,12.354,3.44753,6.37424";
   mesh.sendSingle(root, readings);
-
 }
 
 void sendMessage() 

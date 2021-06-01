@@ -20,6 +20,7 @@
 #include "painlessMesh.h"      // Mesh network header
 #include "namedMesh.h"         // Mesh network with names implemented - see Nodes GitHub version for any changes
 #include <map>                 // C++ map
+#include <ArduinoJson.h>       // JSON parsing and encoding
 
 #ifdef ESP8266
 #include "Hash.h"
@@ -35,8 +36,8 @@
 #define   MESH_PASSWORD   "somethingSneaky"
 #define   MESH_PORT       5555
 
-#define   STATION_SSID     "****"
-#define   STATION_PASSWORD "****"
+#define   STATION_SSID     "----"
+#define   STATION_PASSWORD "----"
 
 #define HOSTNAME "HTTP_BRIDGE"
 
@@ -48,6 +49,9 @@ std::map<unsigned char, String> client_requests;  /* Maps the ticket number to t
 namedMesh  mesh;                      /* namedMesh network class, used to interface with the network */
 String nodeName = "root";                             /* Name for this specific node */
 unsigned char current_ticket = 0;               /* Current ticket number to give to requests */
+
+const char* client_username = "admin";
+const char* client_password = "admin";
 
 /*-- Prototypes --*/
 
@@ -90,8 +94,10 @@ void setup()
   myAPIP = IPAddress(mesh.getAPIP());
   Serial.println("My AP IP is " + myAPIP.toString());
 
-  server.on("/request", HTTP_GET, [](AsyncWebServerRequest *request)
+  server.on("/request", HTTP_GET, [](AsyncWebServerRequest *request) 
   {
+    if(!request->authenticate(client_username, client_password))
+      return request->requestAuthentication();
     //request->send(200, "text/html", "<form>Text to Broadcast<br><input type='text' name='NODE'><br><br><input type='text' name='BROADCAST'><br><br><input type='submit' value='Submit'><br><br><p></p></form>");
     if (request->hasArg("BROADCAST")){
       current_ticket++;
@@ -115,11 +121,28 @@ void setup()
 
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
   {
+    if(!request->authenticate(client_username, client_password))
+      return request->requestAuthentication();
     request->redirect("/request");
+  });
+
+  server.on("/check", HTTP_GET, [](AsyncWebServerRequest *request)
+  {
+    if(!request->authenticate(client_username, client_password)) {
+      return request->requestAuthentication();
+    }
+    String tickets = "";
+    for(auto const& pr : client_requests) {
+      tickets += String(pr.first);
+      tickets += ":";
+    }
+    request->send(200, "text/plain", tickets);
   });
 
   server.on("/get-request", HTTP_GET, [](AsyncWebServerRequest *request)
   {
+    if(!request->authenticate(client_username, client_password))
+      return request->requestAuthentication();
     //request->send(200, "text/html", "<form>Text to Broadcast<br><input type='text' name='TICKET'><br><br><input type='submit' value='Submit'></form>");
     if (request->hasArg("TICKET")){
       unsigned char client_request = (unsigned char) request->arg("TICKET").toInt();
@@ -139,6 +162,8 @@ void setup()
 
   server.on("/nodes", HTTP_GET, [](AsyncWebServerRequest *request)
   {
+    if(!request->authenticate(client_username, client_password))
+      return request->requestAuthentication();
       auto nodes = mesh.getNodeList(true);
       String str;
       for (auto &&id : nodes) {
