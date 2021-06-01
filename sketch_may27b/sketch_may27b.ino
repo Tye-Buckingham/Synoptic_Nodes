@@ -95,6 +95,7 @@ void setup()
   {
     // ticket_num:message - message can be READINGS, ERRORS, SETTINGS
     char buffer[4];
+    char* str;
     unsigned char i = 0;
     unsigned char j = 0;
     while(msg.c_str()[i] != ':') { // ticket number
@@ -102,10 +103,13 @@ void setup()
         i++;
     }
     buffer[i] = '\0';
-    unsigned char ticket_num =(unsigned char)sscanf(buffer, "%d", &i);
-
+    int ticket_num = 0;
+    sscanf(buffer, "%d", &ticket_num);
+    Serial.print("Buffer: ");
+    Serial.println(buffer);
+    Serial.println("Ticket num: " + String(ticket_num));
     if(msg.indexOf("READINGS") != -1) {
-      sendReadings(ticket_num);
+      sendReadings((unsigned char)ticket_num);
     } else if(msg.indexOf("ERRORS") != -1) {
 
     } else if(msg.indexOf("SETTINGS") != -1) {

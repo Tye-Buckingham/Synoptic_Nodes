@@ -82,7 +82,11 @@ void setup()
         i++;
       }
       buffer[i] = '\0';
-      client_requests[(unsigned char)sscanf(buffer, "%d", &i)] = msg;
+      Serial.print("Test: ");
+      Serial.println(buffer);
+      int ticket_num = 0;
+      sscanf(buffer, "%d", &ticket_num);
+      client_requests[(unsigned char)ticket_num] = msg;
       Serial.printf("bridge: Received from %u msg=%s\n", from, msg.c_str());
   });
 
@@ -114,7 +118,6 @@ void setup()
       //request->send(200, "text/html", "<form>Text to Broadcast<br><input type='text' name='NODE'><br><br><input type='text' name='BROADCAST'><br><br><input type='submit' value='Submit'><br><br><p>"+ String(current_ticket) +"</p></form>");
       request->send(200, "text/plain", String(current_ticket));
       client_requests.insert({current_ticket, empty});
-      Serial.println(node_reply);
     } else {
       request->send(404, "text/plain", "Invalid");
     }
@@ -144,11 +147,12 @@ void setup()
     if(!request->authenticate(client_username, client_password))
       request->redirect("/request");
     //request->send(200, "text/html", "<form>Text to Broadcast<br><input type='text' name='TICKET'><br><br><input type='submit' value='Submit'></form>");
-    if (request->hasArg("TICKET")){
+    if(request->hasArg("TICKET")){
       unsigned char client_request = (unsigned char) request->arg("TICKET").toInt();
+      Serial.println(client_request);
       auto search = client_requests.find(client_request);
        if(search != client_requests.end()) {
-         if(client_requests[client_request] != "") {
+         if(!(client_requests[client_request].equals(""))) {
             request->send(200, "text/plain", client_requests[client_request]);
             client_requests.erase(client_request);
          } else {
