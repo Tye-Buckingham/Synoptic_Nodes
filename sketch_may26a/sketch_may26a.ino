@@ -49,7 +49,7 @@ std::map<unsigned char, String> client_requests;  /* Maps the ticket number to t
 namedMesh  mesh;                      /* namedMesh network class, used to interface with the network */
 String nodeName = "root";                             /* Name for this specific node */
 unsigned char current_ticket = 0;               /* Current ticket number to give to requests */
-std::map<IPAddress, String> client_connections;           /* USer connections map */
+std::map<IPAddress, String> client_connections;           /* User connections map */
 
 const char* client_username = "admin";
 const char* client_password = "admin";
@@ -150,13 +150,14 @@ void setup()
        if(search != client_requests.end()) {
          if(client_requests[client_request] != "") {
             request->send(200, "text/plain", client_requests[client_request]);
+            client_requests.erase(client_request);
          } else {
             request->send(200, "text/plain", "request not ready");
          }
        } else {
          request->send(200, "text/plain", "ticket not found");
        }
-      client_requests.erase(client_request);
+      
      }
   });
 
@@ -167,7 +168,7 @@ void setup()
       auto nodes = mesh.getNodeList(true);
       String str;
       for (auto &&id : nodes) {
-        str += "ID : " + String(id) + String(", Name : ");
+        str += "ID:" + String(id) + String(",Name:");
         for (auto && pr : mesh.getnameMap()) {
                 if (id == (pr.first)) {
                     str += pr.second;
