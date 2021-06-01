@@ -17,8 +17,11 @@ Node System for Synoptic Project
 *** Files
 #+BEGIN_CENTER
 [[./java_client/example.java][Java example client for making HTTP requests]]
+
 [[./sketch_may27b/sketch_may27b.ino][Log node used for recording sensor readings]]
+
 [[./sketch_may26a/sketch_may26a.ino][Bridge HTTP server node used for communicating with nodes on the mesh network]]
+
 [[./sketch_may27b/data/namedMesh.h][Local version of namedMesh containing some minor changes]]
 #+END_CENTER
 
