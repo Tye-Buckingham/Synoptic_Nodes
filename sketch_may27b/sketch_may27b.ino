@@ -38,7 +38,7 @@ String nodeName = "lobitos";                   /* Name for this specific node */
 /*-- Prototypes --*/
 
 /** @brief Function used to send stored readings as a string to the bridge node when the user requests
- *  @param Void.
+ *  @param @param ticket_number the ticket that is currently being sent back to the bridge/root node
  *  @return Void.
  */
 void sendReadings(unsigned char ticket_number); 
