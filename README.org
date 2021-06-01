@@ -65,7 +65,7 @@ in order to make requests. The requests follow a standard HTTP request
 + /time requires a unix timestamp with the argument named *TIME*
 #+begin_src java
 long ut1 = Instant.now().getEpochSecond();
-String time = "http://192.168.1.103/time?TIME="+ut1;
+String time = "http://[server_node_IP]/time?TIME="+ut1;
 #+end_src
 + /request requires a node name (use /nodes to get all active nodes) and a type of request as *NODE* and *BROADCAST* respectively.
 #+begin_src java
