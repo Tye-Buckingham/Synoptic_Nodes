@@ -44,8 +44,6 @@
 
 /*-- Global Variables --*/
        
-String from_node;                  /* What node replied [may no longer be use in later in development] */
-String node_reply;              /* What the node replied  [may no longer be use in later in development] */
 std::map<unsigned char, String> client_requests;  /* Maps the ticket number to the reply */
 namedMesh  mesh;                      /* namedMesh network class, used to interface with the network */
 String nodeName = "root";                             /* Name for this specific node */
@@ -76,19 +74,23 @@ void setup()
 
   //mesh.onReceive(&receivedCallback);
   mesh.onReceive([](String &from, String &msg) { // add node reply to the map
-      from_node  = from; 
-      node_reply = msg;
-      char buffer[4];
-      int i = 0;
-      while(msg.c_str()[i] != ':') {
-        buffer[i] = msg.c_str()[i];
+      char buffer[15];
+      int i, j = 0;
+      while(msg.c_str()[i] != ':') { // get past the 'ticket'
         i++;
       }
-      buffer[i] = '\0';
+      i++; // consume the ':'
+      while(msg.c_str()[i] != ',') {
+        buffer[j] = msg.c_str()[i];
+        i++;
+        j++;
+      }
+      buffer[j] = '\0';
       Serial.print("Test: ");
       Serial.println(buffer);
       int ticket_num = 0;
       sscanf(buffer, "%d", &ticket_num);
+      Serial.println(msg);
       client_requests[(unsigned char)ticket_num] = msg;
       Serial.printf("bridge: Received from %u msg=%s\n", from, msg.c_str());
   });
@@ -179,6 +181,8 @@ void setup()
             request->send(200, "text/plain", client_requests[client_request]);
             client_requests.erase(client_request);
          } else {
+           Serial.println(client_request);
+           Serial.println(client_requests[client_request]);
             request->send(200, "text/plain", "request not ready");
          }
        } else {

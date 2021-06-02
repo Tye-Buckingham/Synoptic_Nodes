@@ -65,7 +65,7 @@ void sendMessage();
  *  @param content the string to be appended to the file
  *  @return Void.
  */
-void appendFile(String path, const char* content);
+void appendFile(String path, String content);
 
 
 /** @brief Writes a new file onto the storage device
@@ -89,8 +89,13 @@ void logReading(String path)
 
    // "[time_stamp]:[data1, data2, data3],"
    String reading = "\"";
-   reading += String(now()) + "\": [" ;
+   Serial.println(reading);
+   reading += String(now());
+   Serial.println(reading);
+   reading += "\": [" ;
+   Serial.println(reading);
    reading += String(random(0, 250)) + "," + String(random(0, 250)) + "," + String(random(0, 250)) + "],";
+   Serial.println(reading);
    appendFile(readings_path, reading);
 
 }
@@ -107,6 +112,7 @@ void appendFile(String path, String content)
     48.75608 //...
   ]
   */
+  Serial.println(path + ":" + content);
   File file = SD.open(path, FILE_WRITE);
     if(!file){
         Serial.println("Failed to open file " + String(path) + " for appending");
@@ -163,19 +169,25 @@ void sendReadings(unsigned char ticket_number)
     Serial.println("SD card Initialization failed");
     while (1);
   }
+  char ch;
   String root = "root";
   String readings = "{\"ticket\":" + String(ticket_number)  + ",";
   File readings_file = SD.open(readings_path);
   if(readings_file) {
     while(readings_file.available()) {
-      readings += String(readings_file.read());
-  }
+      ch = readings_file.read();
+      readings += String(ch);
+    }
     readings_file.close();
+    readings.remove(readings.length()- 1); // removes final trailing ','
     readings += "}"; // may have trailing ',' - may need to remove before adding the '}' for parsing
     mesh.sendSingle(root, readings);
+    Serial.println("Message sent: ");
+    Serial.println(readings);
   } else {
     Serial.println("Error opening file");
   }
+  readings_file.close();
   //String root = "root";
   //String readings = "{\"ticket\": " +String(ticket_number) + "," + "\"1622119135383\":[9.214,3.45453,1.3424],\"1622119135383\"[12.354,3.44753,6.37424]}";
   
@@ -247,8 +259,6 @@ void setup()
         mesh.sendSingle(from, reply); 
       }
     }
-    //Serial.print("Now: ");
-    //Serial.println(now());
     prev_time = now();
     setTime(1622632039);
   });
@@ -259,7 +269,7 @@ void setup()
 
 void loop() 
 {
-  if(timeStatus() == timeSet || timeStatus() == timeNeedsSync) {
+  if(timeStatus() == timeSet) {
     if(now() - (minutes_interval * 60) >= prev_time){
       Serial.println("Logging reading");
       logReading(readings_path);
