@@ -40,6 +40,9 @@ String readings_path = "/readings.txt";
 String errors_path   = "/errors.txt";
 String settings_path = "/settings.txt";
 
+unsigned char minutes_interval;
+time_t prev_time;
+
 /*-- Prototypes --*/
 
 /** @brief Function used to send stored readings as a string to the bridge node when the user requests
@@ -215,6 +218,7 @@ void setup()
     }
     //Serial.print("Now: ");
     //Serial.println(now());
+    prev_time = now();
     
   });
 
@@ -224,5 +228,8 @@ void setup()
 
 void loop() 
 {
+  if(timeStatus() != timeNotSet && now() - (minutes_interval * 60) >= prev_time) {
+    logReading(SD, readings_path);
+  }
   mesh.update();
 }
