@@ -8,6 +8,7 @@ Node System for Synoptic Project
 + [-] Store sensor readings and settings onto SD card
 + [ ] Error and settings requests
 + [ ] Fully parse requests in Java client
++ [ ] Ability to clear incomplete requests 
 + [ ] Doxygen
 
 
