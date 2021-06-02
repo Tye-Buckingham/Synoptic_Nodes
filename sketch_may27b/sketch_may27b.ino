@@ -22,7 +22,7 @@
 #include <SD.h>             // SD Storage header
 #include <SPI.h>            // Serial Peripheral Interface
 #include <TimeLib.h>        // Arduino time library
-#include "FS.h"             // Arduino File System libbrary
+#include <FS.h>             // Arduino File System libbrary
 
 /*-- Global Definitions --*/
 
@@ -40,8 +40,8 @@ String readings_path = "/readings.txt";
 String errors_path   = "/errors.txt";
 String settings_path = "/settings.txt";
 
-unsigned char minutes_interval;           /* Time interval to record data logs */
-time_t prev_time;               /* Determine  if enough time has passed to record a data log */
+unsigned char minutes_interval = 1;           /* Time interval to record data logs */
+time_t prev_time;                    /* Determine  if enough time has passed to record a data log */
 
 /*-- Prototypes --*/
 
@@ -65,7 +65,7 @@ void sendMessage();
  *  @param content the string to be appended to the file
  *  @return Void.
  */
-void appendFile(fs::FS &fs, const char* path, const char* content);
+void appendFile(String path, const char* content);
 
 
 /** @brief Writes a new file onto the storage device
@@ -73,7 +73,7 @@ void appendFile(fs::FS &fs, const char* path, const char* content);
  *  @param path the files path on the storage medium
  *  @return Void.
  */
-void writeFile(fs::FS &fs, const char* path);
+void writeFile(String path);
 
 
 /** @brief Records a reading to the readings files
@@ -81,22 +81,22 @@ void writeFile(fs::FS &fs, const char* path);
  *  @param path the files path on the storage medium
  *  @return Void.
  */
-void logReading(fs::FS &fs, const char* path);
+void logReading(String path);
 
 
-void logReading(fs::FS &fs, const char* path)
+void logReading(String path)
 {
 
    // "[time_stamp]:[data1, data2, data3],"
    String reading = "\"";
    reading += String(now()) + "\": [" ;
    reading += String(random(0, 250)) + "," + String(random(0, 250)) + "," + String(random(0, 250)) + "],";
-   appendFile(SD, readings_path, reading);
+   appendFile(readings_path, reading);
 
 }
 
 
-void appendFile(fs::FS &fs, const char* path, const char* content)
+void appendFile(String path, String content)
 {
 
   // Dont append with final closing }, this will be done when sending the string (along with the ticket number)
@@ -107,7 +107,7 @@ void appendFile(fs::FS &fs, const char* path, const char* content)
     48.75608 //...
   ]
   */
-  File file = fs.open(path, FILE_APPEND);
+  File file = SD.open(path, FILE_WRITE);
     if(!file){
         Serial.println("Failed to open file " + String(path) + " for appending");
         return;
@@ -122,10 +122,10 @@ void appendFile(fs::FS &fs, const char* path, const char* content)
 
 }
 
-void writeFile(fs::FS &fs, const char* path) 
+void writeFile(String path) 
 {
  
-  File file = fs.open(path, FILE_WRITE);
+  File file = SD.open(path, FILE_WRITE);
   if(!file) {
     Serial.println("File creation failed");
     return;
@@ -163,11 +163,12 @@ void sendReadings(unsigned char ticket_number)
     Serial.println("SD card Initialization failed");
     while (1);
   }
+  String root = "root";
   String readings = "{\"ticket\":" + String(ticket_number)  + ",";
   File readings_file = SD.open(readings_path);
   if(readings_file) {
     while(readings_file.available()) {
-      readings_file += readings_file.read();
+      readings += String(readings_file.read());
   }
     readings_file.close();
     readings += "}"; // may have trailing ',' - may need to remove before adding the '}' for parsing
@@ -192,7 +193,7 @@ void setup()
 {
   Serial.begin(115200);
 
-  if(!SD.begin()){
+  if(!SD.begin(chip_select)){
       Serial.println("Card Mount Failed");
       return;
   }
@@ -252,7 +253,7 @@ void setup()
 void loop() 
 {
   if(timeStatus() != timeNotSet && now() - (minutes_interval * 60) >= prev_time) {
-    logReading(SD, readings_path);
+    logReading(readings_path);
   }
   mesh.update();
 }
