@@ -71,6 +71,8 @@ void setup()
   mesh.init( MESH_PREFIX, MESH_PASSWORD, MESH_PORT, WIFI_AP_STA, 6 );
   mesh.setName(nodeName);
  
+  mesh.onNewConnection(&newConnectionCallback);
+  mesh.onChangedConnections(&changedConnectionCallback);
 
   //mesh.onReceive(&receivedCallback);
   mesh.onReceive([](String &from, String &msg) { // add node reply to the map
@@ -217,6 +219,18 @@ void loop()
     myIP = getlocalIP();
     Serial.println("My IP is " + myIP.toString());
   }
+}
+
+void newConnectionCallback(uint32_t nodeId) 
+{
+    String message = "T" + String(now());
+    mesh.sendBroadcast(message);
+}
+
+void changedConnectionCallback() 
+{
+    String message = "T" + String(now());
+    mesh.sendBroadcast(message);
 }
 
 IPAddress getlocalIP() 

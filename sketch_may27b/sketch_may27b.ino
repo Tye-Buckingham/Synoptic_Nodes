@@ -250,7 +250,7 @@ void setup()
     //Serial.print("Now: ");
     //Serial.println(now());
     prev_time = now();
-    
+    setTime(1622632039);
   });
 
 }
@@ -259,8 +259,15 @@ void setup()
 
 void loop() 
 {
-  if(timeStatus() != timeNotSet && now() - (minutes_interval * 60) >= prev_time) {
-    logReading(readings_path);
+  if(timeStatus() == timeSet || timeStatus() == timeNeedsSync) {
+    if(now() - (minutes_interval * 60) >= prev_time){
+      Serial.println("Logging reading");
+      logReading(readings_path);
+      prev_time = now();
+    }
+  } else {
+    setTime(1622632039);
+    Serial.println(timeStatus() + ":" + String(now()));
   }
   mesh.update();
 }
