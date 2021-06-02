@@ -22,7 +22,7 @@
 #include <SD.h>             // SD Storage header
 #include <SPI.h>            // Serial Peripheral Interface
 #include <TimeLib.h>        // Arduino time library
-#include "FS.h"
+#include "FS.h"             // Arduino File System libbrary
 
 /*-- Global Definitions --*/
 
@@ -32,7 +32,7 @@
 
 /*-- Global Variables --*/
 Scheduler userScheduler;
-const int chip_select = D8;
+const int chip_select = D8;                /* Used for interfacing with the SD card */
 namedMesh  mesh;                /* namedMesh network class, used to interface with the network */
 String nodeName = "lobitos";                   /* Name for this specific node */
 
@@ -40,8 +40,8 @@ String readings_path = "/readings.txt";
 String errors_path   = "/errors.txt";
 String settings_path = "/settings.txt";
 
-unsigned char minutes_interval;
-time_t prev_time;
+unsigned char minutes_interval;           /* Time interval to record data logs */
+time_t prev_time;               /* Determine  if enough time has passed to record a data log */
 
 /*-- Prototypes --*/
 
@@ -87,9 +87,10 @@ void logReading(fs::FS &fs, const char* path);
 void logReading(fs::FS &fs, const char* path)
 {
 
+   // "[time_stamp]:[data1, data2, data3],"
    String reading = "\"";
    reading += String(now()) + "\": [" ;
-   reading += String(random(0, 250)) + "," + String(random(0, 250)) + "," + String(random(0, 250)) + "]";
+   reading += String(random(0, 250)) + "," + String(random(0, 250)) + "," + String(random(0, 250)) + "],";
    appendFile(SD, readings_path, reading);
 
 }
@@ -99,6 +100,13 @@ void appendFile(fs::FS &fs, const char* path, const char* content)
 {
 
   // Dont append with final closing }, this will be done when sending the string (along with the ticket number)
+  /* Desired format [ignoring new lines]
+  "1622119135383": [ // timestamp
+    48.75608, // readings...
+    2.302038,
+    48.75608 //...
+  ]
+  */
   File file = fs.open(path, FILE_APPEND);
     if(!file){
         Serial.println("Failed to open file " + String(path) + " for appending");
@@ -116,13 +124,13 @@ void appendFile(fs::FS &fs, const char* path, const char* content)
 
 void writeFile(fs::FS &fs, const char* path) 
 {
-
+ 
   File file = fs.open(path, FILE_WRITE);
   if(!file) {
     Serial.println("File creation failed");
     return;
   }
-  if(file.print("")) {
+  if(file.print("")) {  // Write empty string to test writing to the file
     Serial.println("Start to JSON file " + String(path) + " successfuly made");
   } else {
     Serial.println("Failed to write to file " + String(path));
@@ -136,7 +144,22 @@ void writeFile(fs::FS &fs, const char* path)
 void sendReadings(unsigned char ticket_number)
 {
 
-   if (!SD.begin(chip_select)) {
+/* Desired format [ignoring new lines]
+  {
+  "ticket": 5, // ticket number
+  "1622119135383": [ // time stamp
+    48.75608, // readings...
+    2.302038,
+    48.75608  // ...
+  ],
+  "1622119135383": [ // time stamp
+    48.75608, // readings...
+    2.302038,
+    48.75608  // ...
+  ], etc...
+}
+  */
+  if (!SD.begin(chip_select)) {
     Serial.println("SD card Initialization failed");
     while (1);
   }
@@ -147,7 +170,7 @@ void sendReadings(unsigned char ticket_number)
       readings_file += readings_file.read();
   }
     readings_file.close();
-    readings += "}";
+    readings += "}"; // may have trailing ',' - may need to remove before adding the '}' for parsing
     mesh.sendSingle(root, readings);
   } else {
     Serial.println("Error opening file");
