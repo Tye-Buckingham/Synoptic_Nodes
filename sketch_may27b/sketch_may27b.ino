@@ -216,6 +216,13 @@ void setup()
       msg.toCharArray(temp, msg.length() + 1);
       time_t new_time = strtoul(temp, &ptr, 10);
       setTime(new_time);
+    } else if(msg.c_str()[0] == 'I') { 
+      char* ptr;
+      char* temp = (char*)malloc((msg.length())*sizeof(char*));
+      msg.remove(0, 1);
+      msg.toCharArray(temp, msg.length() + 1);
+      unsigned long new_interval = strtoul(temp, &ptr, 10);
+      minutes_interval = (unsigned char) new_interval;
     } else {
       // ticket_num:message - message can be READINGS, ERRORS, SETTINGS
       char buffer[4];
