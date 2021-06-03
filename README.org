@@ -2,6 +2,7 @@
 Node System for Synoptic Project
 
 + Node connection system using a root node as a web server and children nodes as data logging nodes. The requests can be made through a browser or any HTTP client, an example java client is provided. The requests use a ticket system for retrieving the request.
++ The data logging nodes would be connected to [[#readings][multiple sensors]] that would report these readings to the client. The client would then be tasked with sorting, graphing and reporting undesirable readings.
 
 ** TODO TODO_List (01/06/20)
 + [X] Dummy sensor reading
@@ -36,6 +37,9 @@ Time keeping is done through the client upon connection and at regular intervals
 
 
 *** Readings
+:PROPERTIES:
+:CUSTOM_ID: readings
+:END:
 
 Formatted [Turbidity, TDS, pressure, flow rate, pH, Temp] :: 
 
