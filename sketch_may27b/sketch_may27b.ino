@@ -89,7 +89,6 @@ void writeFile(String path, String content);
 
 
 /** @brief Records a reading to the readings files
- *  @param fs a file system pointer used in interfacing with the file
  *  @param path the files path on the storage medium
  *  @return Void.
  */
@@ -156,7 +155,6 @@ void writeFile(String path, String content)
   }
   file.close();
 
-
 }
 
 
@@ -188,6 +186,7 @@ void sendReadingsArchive(unsigned char ticket_number)
   readings_file.close();
   writeFile(readings_archive_path, readings); // write old readings to archive file
   SD.remove(readings_path); // delete old file
+  writeFile(readings_path, ""); // make new readings file
   
 }
 
@@ -222,6 +221,7 @@ void sendReadings(unsigned char ticket_number)
       ch = readings_file.read();
       readings += String(ch);
     }
+
     readings_file.close();
     readings.remove(readings.length()- 1); // removes final trailing ','
     readings += "}"; // may have trailing ',' - may need to remove before adding the '}' for parsing
@@ -265,6 +265,7 @@ void setup()
   mesh.onReceive([](String &from, String &msg) 
   {
     //Serial.printf("Received message by name from: %s, %s\n", from.c_str(), msg.c_str());
+    Serial.println(msg);
     if(msg.c_str()[0] == 'T') {
       char* ptr;
       char* temp = (char*)malloc((msg.length())*sizeof(char*));
@@ -272,6 +273,8 @@ void setup()
       msg.toCharArray(temp, msg.length() + 1);
       time_t new_time = strtoul(temp, &ptr, 10);
       setTime(new_time);
+      prev_time = now();
+      free(temp);
     } else if(msg.c_str()[0] == 'I') { 
       char* ptr;
       char* temp = (char*)malloc((msg.length())*sizeof(char*));
@@ -279,6 +282,8 @@ void setup()
       msg.toCharArray(temp, msg.length() + 1);
       unsigned long new_interval = strtoul(temp, &ptr, 10);
       minutes_interval = (unsigned char) new_interval;
+      Serial.println("Interval changed to: " + String(minutes_interval));
+      free(temp);
     } else {
       // ticket_num:message - message can be READINGS, ERRORS, SETTINGS
       char buffer[4];
@@ -305,24 +310,20 @@ void setup()
         mesh.sendSingle(from, reply); 
       }
     }
-    prev_time = now();
-    setTime(1622632039);
   });
-
 }
-
 
 
 void loop() 
 {
-  if(timeStatus() == timeSet) {
-    if(now() - (minutes_interval * 60) >= prev_time){
+  Serial.println(String(now()));
+  if(timeStatus() == timeSet || timeStatus() == timeNeedsSync) {
+    if(now() >= prev_time + (minutes_interval * 60)){
       Serial.println("Logging reading");
       logReading(readings_path);
       prev_time = now();
     }
   } else {
-    setTime(1622632039);
     Serial.println(timeStatus() + ":" + String(now()));
   }
   mesh.update();

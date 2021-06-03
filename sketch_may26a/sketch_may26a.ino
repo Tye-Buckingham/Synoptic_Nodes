@@ -65,7 +65,7 @@ void setup()
 {
   // Serial and mesh init
   Serial.begin(115200);
-  mesh.setDebugMsgTypes( ERROR | STARTUP | CONNECTION );  // set before init() so that you can see startup messages
+  mesh.setDebugMsgTypes( ERROR | MESH_STATUS | CONNECTION  );  // set before init() so that you can see startup messages
   mesh.init( MESH_PREFIX, MESH_PASSWORD, MESH_PORT, WIFI_AP_STA, 6 );
   mesh.setName(nodeName);
  
@@ -80,17 +80,14 @@ void setup()
         i++;
       }
       i++; // consume the ':'
-      while(msg.c_str()[i] != ',') {
+      while(msg.c_str()[i] != ',' && i < msg.length()) {
         buffer[j] = msg.c_str()[i];
         i++;
         j++;
       }
       buffer[j] = '\0';
-      Serial.print("Test: ");
-      Serial.println(buffer);
       int ticket_num = 0;
       sscanf(buffer, "%d", &ticket_num);
-      Serial.println(msg);
       client_requests[(unsigned char)ticket_num] = msg;
       Serial.printf("bridge: Received from %u msg=%s\n", from, msg.c_str());
   });
@@ -133,6 +130,16 @@ void setup()
     request->redirect("/request");
   });
 
+  server.on("/clear-tickets", HTTP_GET, [](AsyncWebServerRequest *request)
+  {
+    if(!request->authenticate(client_username, client_password)) {
+      return request->requestAuthentication();
+    }
+    client_requests.clear();
+    current_ticket = 0;
+    request->send(200, "text/plain", "Tickets cleared");
+  });
+
   server.on("/check", HTTP_GET, [](AsyncWebServerRequest *request)
   {
     if(!request->authenticate(client_username, client_password)) {
@@ -162,6 +169,23 @@ void setup()
       time_t new_time = strtoul(temp, &ptr, 10);
       setTime(new_time);
       request->send(200, "text/plain", "given_time: " + msg + " - time adjust to: " + now());
+    } else {
+      request->send(200, "text/plain", "please provide time");
+    }
+  });
+
+  server.on("/interval", HTTP_GET, [](AsyncWebServerRequest *request)
+  {
+    if(!request->authenticate(client_username, client_password)) {
+      return request->requestAuthentication();
+    }
+    if (request->hasArg("TIME") && request->hasArg("NODE")){
+      String message = "I" + request->arg("TIME");
+      String msg  = request->arg("TIME");
+      String node = request->arg("NODE");
+      
+      mesh.sendSingle(node, message);
+      request->send(200, "text/plain", "interval: " + msg + " given to: " + node);
     } else {
       request->send(200, "text/plain", "please provide time");
     }
