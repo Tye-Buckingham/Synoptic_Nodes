@@ -35,13 +35,26 @@ to be returned so a ticket system has been implemented to keep track of requests
 Time keeping is done through the client upon connection and at regular intervals, this helps keep the mesh in sync when recording data.
 
 
+*** Readings
+
+Formatted [Turbidity, TDS, pressure, flow rate, pH, Temp] :: 
+
++ Turbidity ::
++ TDS       ::
++ Pressure  ::
++ Flow rate ::
++ pH        ::
++ Temp      ::
+
+
 *** HTTP server requests
 
-+ /request     :: will take a node name and a message to send to the node [READINGS, ERRORS, SETTINGS], increment the ticket and return the ticket to the client. The request will be added to a map with a blank String field.
-+ /check       :: will iterate over the requests map to give the client a list of currently active requests so the client can check if the request was successful.
-+ /time        :: sends the node a timestamp to be broadcast of the network to sync their clocks for logging data.
-+ /nodes       :: returns a list of all currently connected nodes with their ID and their name.
-+ /get-request :: once a request has been made the user will provide the ticket number they where given, and if the request is ready the data will be sent to the client.
++ /request       :: will take a node name and a message to send to the node [READINGS, ERRORS, SETTINGS, READ_ARCHIVE], increment the ticket and return the ticket to the client. The request will be added to a map with a blank String field.
++ /check         :: will iterate over the requests map to give the client a list of currently active requests so the client can check if the request was successful.
++ /time          :: sends the node a timestamp to be broadcast of the network to sync their clocks for logging data.
++ /nodes         :: returns a list of all currently connected nodes with their ID and their name.
++ /get-request   :: once a request has been made the user will provide the ticket number they where given, and if the request is ready the data will be sent to the client.
++ /clear-tickets :: clears all current tickets on the bridge server
 
 -----
 
