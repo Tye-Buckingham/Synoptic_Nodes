@@ -55,6 +55,8 @@ Formatted [Turbidity, TDS, pressure, flow rate, pH, Temp] ::
 
 *** HTTP server requests
 
+Brief explanation of the requests, their inputs and outputs. See the sketch files and example client for more details.
+
 + /request       :: will take a node name and a message to send to the node [READINGS, SETTINGS, READ_ARCHIVE], increment the ticket and return the ticket to the client. The request will be added to a map with a blank String field.
 + /check         :: will iterate over the requests map to give the client a list of currently active requests so the client can check if the request was successful.
 + /time          :: sends the node a timestamp to be broadcast of the network to sync their clocks for logging data.
