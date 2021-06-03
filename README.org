@@ -35,7 +35,7 @@ may not be as these are easy to find within the Arduino IDE and may be pre-insta
 The root node will act as a HTTP server allowing use through a web browser or in this case a Java client. The bridge is unable to wait for requests
 to be returned so a ticket system has been implemented to keep track of requests.
 Time keeping is done through the client upon connection and at regular intervals, this helps keep the mesh in sync when recording data.
-[[Test][/CallumJohnson/Synoptic-Project-53]]
+[[/CallumJohnson/Synoptic-Project-53][Test]]
 *** Readings
 :PROPERTIES:
 :CUSTOM_ID: readings
