@@ -311,12 +311,12 @@ void setup()
       }
     }
   });
+  setTime(now());
 }
 
 
 void loop() 
 {
-  Serial.println(String(now()));
   if(timeStatus() == timeSet || timeStatus() == timeNeedsSync) {
     if(now() >= prev_time + (minutes_interval * 60)){
       Serial.println("Logging reading");
