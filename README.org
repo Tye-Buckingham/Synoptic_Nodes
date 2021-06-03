@@ -1,5 +1,5 @@
 * Synoptic_Nodes
-Node System for Synoptic Project
+Node System for Synoptic Project relating to the Engineers without Borders.
 
 + Node connection system using a root node as a web server and children nodes as data logging nodes. The requests can be made through a browser or any HTTP client, an example java client is provided. The requests use a ticket system for retrieving the request.
 + The data logging nodes would be connected to [[#readings][multiple sensors]] that would report these readings to the client. The client would then be tasked with sorting, graphing and reporting undesirable readings.
@@ -35,7 +35,7 @@ may not be as these are easy to find within the Arduino IDE and may be pre-insta
 The root node will act as a HTTP server allowing use through a web browser or in this case a Java client. The bridge is unable to wait for requests
 to be returned so a ticket system has been implemented to keep track of requests.
 Time keeping is done through the client upon connection and at regular intervals, this helps keep the mesh in sync when recording data.
-[[https://github.com/CallumJohnson/Synoptic-Project-53][Test]]
+
 *** Readings
 :PROPERTIES:
 :CUSTOM_ID: readings
