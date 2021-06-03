@@ -36,7 +36,7 @@ The root node will act as a HTTP server allowing use through a web browser or in
 to be returned so a ticket system has been implemented to keep track of requests.
 Time keeping is done through the client upon connection and at regular intervals, this helps keep the mesh in sync when recording data.
 
-
+[Test](Fentible/Synoptic_Nodes#readings)
 *** Readings
 :PROPERTIES:
 :CUSTOM_ID: readings
