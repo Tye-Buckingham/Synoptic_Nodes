@@ -6,6 +6,8 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Base64;
+import java.util.HashMap;
+import java.util.Iterator;
 
 /**
  *  Base HTTP request system for the mesh network
@@ -28,9 +30,38 @@ import java.util.Base64;
 public class Main {
 
     private static String nodes_list = "http://192.168.1.103/nodes";
-
-
     private static String check = "http://192.168.1.103/check";
+
+    public static int Turbidity = 0;
+    public static int TDS       = 1;
+    public static int pressure  = 2;
+    public static int flow_rate = 3;
+    public static int pH        = 4;
+    public static int Temp      = 5;
+
+    public static HashMap<int, int[6]> readings;
+
+    /**
+     * Method to parse a request for readings from a node
+     * @param readings_string the request returned to the client
+     *        formtted: {"ticket":5,"1622632039": [1,557,22,2,29], ... "1622730328": [1,438,22,13,25]}
+     */
+    private void addReadings(String readings_string) {
+
+        JSONObject jsonObject = new JSONObject(readings_string.trim());
+        Iterator<String> keys = jsonObject.keys();
+
+        while(keys.hasNext()) {
+            String key = keys.next();
+            if(key != "ticket") {
+                if (jsonObject.get(key) instanceof JSONObject) {
+                    int temp_readings[6] = new int[6];
+                    readings.put(Integer.parseInt(key),temp_readings);
+                }
+            }
+        }
+
+    }
 
     public static void main(String[] args) {
         String user = "admin";
