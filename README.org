@@ -7,7 +7,7 @@ Node System for Synoptic Project
 + [X] Dummy sensor reading
 + [X] Store sensor readings and settings onto SD card
 + [X] Option to request and archive readings to reduce future request sizes
-+ [ ] settings requests
++ [ ] Settings requests
 + [ ] Fully parse requests in Java client
 + [X] Ability to clear incomplete requests 
 + [ ] Doxygen
