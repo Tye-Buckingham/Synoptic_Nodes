@@ -55,12 +55,13 @@ Formatted [Turbidity, TDS, pressure, flow rate, pH, Temp] ::
 
 *** HTTP server requests
 
-+ /request       :: will take a node name and a message to send to the node [READINGS, ERRORS, SETTINGS, READ_ARCHIVE], increment the ticket and return the ticket to the client. The request will be added to a map with a blank String field.
++ /request       :: will take a node name and a message to send to the node [READINGS, SETTINGS, READ_ARCHIVE], increment the ticket and return the ticket to the client. The request will be added to a map with a blank String field.
 + /check         :: will iterate over the requests map to give the client a list of currently active requests so the client can check if the request was successful.
 + /time          :: sends the node a timestamp to be broadcast of the network to sync their clocks for logging data.
 + /nodes         :: returns a list of all currently connected nodes with their ID and their name.
 + /get-request   :: once a request has been made the user will provide the ticket number they where given, and if the request is ready the data will be sent to the client.
 + /clear-tickets :: clears all current tickets on the bridge server
++ /interval      :: sets the specified node's data logging interval (in minutes)
 
 -----
 
@@ -71,8 +72,13 @@ This allows the server to tell the user if the request has not been made (or not
 
 All data transferred between nodes is through a formatted string which can then be parsed within the JAVA program, full descriptions of formatting is described in the .java example.
 + */time*'s TIME argument is formatted to the logging node such 'T[unix_timestamp]'
-+ */get-request*'s response will be formatted such [ticket_number]:[data{timestamp,reading1,reading2,reading3}:{timestamp,reading1,reading2,reading3}]
++ */get-request*'s response will be formatted such [ticket_number]:[data{timestamp,reading1,reading2,reading3}:{timestamp,reading1,reading2,reading3}] and needs a TICKET number.
 This saves the nodes time and memory when handling requests and leaves the parsing to the client.
++ */check* will return a : sperated string of all current tickets being processed. 
++ */interval* requires a TIME argument formatted such T[interval_in_minutes]
++ */request* requires a NODE name and a BROADCAST type ([READINGS, SETTINGS, READ_ARCHIVE]), it will return a ticket number used in /get-request
++ */nodes*  requires no argument and will return a string formatted such ID:[node_id],Name:[node_name]
++ */clear-tickets* requires no argument and will return a success message upon completion
 
 
 *** Client
