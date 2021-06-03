@@ -3,7 +3,7 @@ Node System for Synoptic Project
 
 + Node connection system using a root node as a web server and children nodes as data logging nodes. The requests can be made through a browser or any HTTP client, an example java client is provided. The requests use a ticket system for retrieving the request.
 
-** TODO TODO_List (01/06/20)
+** TODO TODO_List (03/06/20)
 + [X] Dummy sensor reading
 + [X] Store sensor readings and settings onto SD card
 + [X] Option to request and archive readings to reduce future request sizes
