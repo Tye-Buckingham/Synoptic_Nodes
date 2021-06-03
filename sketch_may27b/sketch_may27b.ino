@@ -40,16 +40,28 @@ String readings_path = "/readings.txt";
 String errors_path   = "/errors.txt";
 String settings_path = "/settings.txt";
 
+String readings_archive_path = "/readings_archive.txt";
+String errors_archive_path   = "/errors.txt";
+String settings_archive_path = "/settings.txt";
+
 unsigned char minutes_interval = 1;           /* Time interval to record data logs */
 time_t prev_time;                    /* Determine  if enough time has passed to record a data log */
 
 /*-- Prototypes --*/
 
 /** @brief Function used to send stored readings as a string to the bridge node when the user requests
- *  @param @param ticket_number the ticket that is currently being sent back to the bridge/root node
+ *  @param ticket_number the ticket that is currently being sent back to the bridge/root node
  *  @return Void.
  */
 void sendReadings(unsigned char ticket_number);
+
+
+/** @brief Function used to send stored readings as a string to the bridge node when the user requests
+ *          then stores those readings in an archive file
+ *  @param @param ticket_number the ticket that is currently being sent back to the bridge/root node
+ *  @return Void.
+ */
+void sendReadingsArchive(unsigned char ticket_number);
 
 
 /** @brief Basic function used to test the connections between the root during development
@@ -69,11 +81,11 @@ void appendFile(String path, String content);
 
 
 /** @brief Writes a new file onto the storage device
- *  @param fs a file system pointer used in interfacing with the file
+ *  @param content the content to be saved to the file
  *  @param path the files path on the storage medium
  *  @return Void.
  */
-void writeFile(String path);
+void writeFile(String path, String content);
 
 
 /** @brief Records a reading to the readings files
@@ -94,7 +106,8 @@ void logReading(String path)
    Serial.println(reading);
    reading += "\": [" ;
    Serial.println(reading);
-   reading += String(random(0, 250)) + "," + String(random(0, 250)) + "," + String(random(0, 250)) + "],";
+   // Turbidity, TDS, pressure, flow rate, pH, Temp
+   reading += String(random(0, 3)) + "," + String(random(300, 2000)) + "," + String(random(20, 8) + random(1, 6)) + "," + String(random(0, 14)) + "," + String(random(20, 30)) + "],";
    Serial.println(reading);
    appendFile(readings_path, reading);
 
@@ -128,7 +141,7 @@ void appendFile(String path, String content)
 
 }
 
-void writeFile(String path) 
+void writeFile(String path, String content) 
 {
  
   File file = SD.open(path, FILE_WRITE);
@@ -136,7 +149,7 @@ void writeFile(String path)
     Serial.println("File creation failed");
     return;
   }
-  if(file.print("")) {  // Write empty string to test writing to the file
+  if(file.print(content)) {  // Write empty string to test writing to the file
     Serial.println("Start to JSON file " + String(path) + " successfuly made");
   } else {
     Serial.println("Failed to write to file " + String(path));
@@ -147,11 +160,42 @@ void writeFile(String path)
 }
 
 
+void sendReadingsArchive(unsigned char ticket_number)
+{
+
+  if (!SD.begin(chip_select)) {
+    Serial.println("SD card Initialization failed");
+    while (1);
+  }
+  char ch;
+  String root = "root";
+  String readings = "{\"ticket\":" + String(ticket_number)  + ",";
+  File readings_file = SD.open(readings_path);
+  if(readings_file) {
+    while(readings_file.available()) {
+      ch = readings_file.read();
+      readings += String(ch);
+    }
+    readings_file.close();
+    readings.remove(readings.length()- 1); // removes final trailing ','
+    readings += "}"; // may have trailing ',' - may need to remove before adding the '}' for parsing
+    mesh.sendSingle(root, readings);
+    Serial.println("Message sent: ");
+    Serial.println(readings);
+  } else {
+    Serial.println("Error opening file");
+  }
+  readings_file.close();
+  writeFile(readings_archive_path, readings); // write old readings to archive file
+  SD.remove(readings_path); // delete old file
+  
+}
+
 void sendReadings(unsigned char ticket_number)
 {
 
 /* Desired format [ignoring new lines]
-  {
+{
   "ticket": 5, // ticket number
   "1622119135383": [ // time stamp
     48.75608, // readings...
@@ -250,6 +294,8 @@ void setup()
       sscanf(buffer, "%d", &ticket_num);
       if(msg.indexOf("READINGS") != -1) {
         sendReadings((unsigned char)ticket_num);
+      } else if(msg.indexOf("READ_ARCHIVE")) {
+        sendReadingsArchive((unsigned char)ticket_num);
       } else if(msg.indexOf("ERRORS") != -1) {
 
       } else if(msg.indexOf("SETTINGS") != -1) {
