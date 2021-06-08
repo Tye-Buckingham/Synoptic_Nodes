@@ -1,5 +1,5 @@
 * Synoptic_Nodes
-Node System for Synoptic Project relating to the Engineers without Borders.
+Node System for Synoptic Project relating to the Engineers without Borders. For a full explanation and description of the implementation, methodology and real world scenario please see [[./documentation/nodes_doc.pdf][nodes_doc.pdf]] in 'documentation'.
 
 + Node connection system using a root node as a web server and children nodes as data logging nodes. The requests can be made through a browser or any HTTP client, an example java client is provided. The requests use a ticket system for retrieving the request.
 + The data logging nodes would be connected to [[#readings][multiple sensors]] that would report these readings to the client. The client would then be tasked with sorting, graphing and reporting undesirable readings.
@@ -20,6 +20,7 @@ Node System for Synoptic Project relating to the Engineers without Borders.
 
 *** Files
 #+BEGIN_CENTER
+- [[./documentation/nodes_doc.pdf][Node network proposal]]
 - [[./java_client/example.java][Java example client for making HTTP requests]]
 - [[./sketch_may27b/sketch_may27b.ino][Log node used for recording sensor readings]]
 - [[./sketch_may26a/sketch_may26a.ino][Bridge HTTP server node used for communicating with nodes on the mesh network]]
