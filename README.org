@@ -29,8 +29,8 @@ Node System for Synoptic Project relating to the Engineers without Borders.
 *** Nodes
 
 One node is to be setup with the 26a sketch (this will be the root/bridge node) and all others will use the 27b sketch.
-The code will work with a ESP32 or ESP8266 so long as the correct libraries have been installed, a list of some can be found below however,
-may not be as these are easy to find within the Arduino IDE and may be pre-installed already.
+The code will work with a ESP32 or ESP8266 so long as the correct libraries have been installed, a list of some can be found below however, some
+may not be as these are either easy to find within the Arduino IDE, be pre-installed already or a core part of the Arduino libraries.
 
 The root node will act as a HTTP server allowing use through a web browser or in this case a Java client. The bridge is unable to wait for requests
 to be returned so a ticket system has been implemented to keep track of requests.
@@ -54,6 +54,8 @@ Formatted [Turbidity, TDS, pressure, flow rate, pH, Temp] ::
 
 
 *** HTTP server requests
+
+Brief explanation of the requests, their inputs and outputs. See the sketch files and example client for more details.
 
 + /request       :: will take a node name and a message to send to the node [READINGS, SETTINGS, READ_ARCHIVE], increment the ticket and return the ticket to the client. The request will be added to a map with a blank String field.
 + /check         :: will iterate over the requests map to give the client a list of currently active requests so the client can check if the request was successful.
