@@ -1,6 +1,6 @@
 /**
   ******************************************************************************
-  * @file    readings_node.ino
+  * @file    logging_node.ino
   * @author  T. Buckingham
   * @brief   Sketch file for children nodes that record and send readings to the 
   *           user via the bridge [see bridge_node.ino]
@@ -49,30 +49,33 @@ time_t prev_time;                    /* Determine  if enough time has passed to 
 
 /*-- Prototypes --*/
 
-/** @brief Function used to send stored readings as a string to the bridge node when the user requests
+/** 
+*   @brief Function used to send stored readings as a string to the bridge node when the user requests
  *  @param ticket_number the ticket that is currently being sent back to the bridge/root node
  *  @return Void.
  */
 void sendReadings(unsigned char ticket_number);
 
 
-/** @brief Function used to send stored readings as a string to the bridge node when the user requests
+/** 
+*   @brief Function used to send stored readings as a string to the bridge node when the user requests
  *          then stores those readings in an archive file
- *  @param @param ticket_number the ticket that is currently being sent back to the bridge/root node
+ *  @param ticket_number the ticket that is currently being sent back to the bridge/root node
  *  @return Void.
  */
 void sendReadingsArchive(unsigned char ticket_number);
 
 
-/** @brief Basic function used to test the connections between the root during development
+/** 
+ *  @brief Basic function used to test the connections between the root during development
  *  @param Void.
  *  @return Void.
  */
 void sendMessage();
 
 
-/** @brief Appends a string, in this case a log, to the specified file
- *  @param fs a file system pointer used in interfacing with the file
+/** 
+*   @brief Appends a string, in this case a log, to the specified file
  *  @param path the files path on the storage medium
  *  @param content the string to be appended to the file
  *  @return Void.
@@ -80,7 +83,8 @@ void sendMessage();
 void appendFile(String path, String content);
 
 
-/** @brief Writes a new file onto the storage device
+/** 
+ *  @brief Writes a new file onto the storage device
  *  @param content the content to be saved to the file
  *  @param path the files path on the storage medium
  *  @return Void.
@@ -88,7 +92,8 @@ void appendFile(String path, String content);
 void writeFile(String path, String content);
 
 
-/** @brief Records a reading to the readings files
+/** 
+ *  @brief Records a reading to the readings files
  *  @param path the files path on the storage medium
  *  @return Void.
  */
