@@ -10,9 +10,9 @@ Node System for Synoptic Project relating to the Engineers without Borders. For 
 + [X] Store sensor readings and settings onto SD card
 + [X] Option to request and archive readings to reduce future request sizes
 + [ ] Settings requests
-+ [-] Fully parse requests in Java client
++ [X] Fully parse requests in Java client
 + [X] Ability to clear incomplete requests 
-+ [ ] Doxygen
++ [X] Doxygen
 + [ ] Screenshots of use
 
 
