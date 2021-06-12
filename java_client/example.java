@@ -65,7 +65,7 @@ public class Main {
             if (!key.equals("ticket")) {
                 System.out.println(jsonObject.get(key));
                 List<Integer> temp_readings = Stream.of(jsonObject.get(key).toString().replaceAll("[\\[\\]]", "").split(",")).map(Integer::parseInt).collect(Collectors.toList());
-                readings.put(new Timestamp(Long.parseLong(key)), temp_readings);
+                readings.put(new Timestamp(Long.parseLong(key) * 1000), temp_readings);
             }
         }
     }
