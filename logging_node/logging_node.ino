@@ -111,7 +111,7 @@ void logReading(String path)
    reading += "\": [" ;
    Serial.println(reading);
    // Turbidity, TDS, pressure, flow rate, pH, Temp
-   reading += String(random(1, 1000)) + "," + String(random(0, 1000)) + "," + String(random(30, 80) + "," + random(1, 30)) + "," + String(random(0, 14)) + "," + String(random(20, 30)) + "],";
+   reading += String(random(1, 1000)) + "," + String(random(0, 1000)) + "," + String(random(30, 80)) + "," + String(random(1, 30)) + "," + String(random(0, 14)) + "," + String(random(20, 30)) + "],";
    Serial.println(reading);
    appendFile(readings_path, reading);
 

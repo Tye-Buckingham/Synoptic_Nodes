@@ -228,6 +228,12 @@ public class Main {
         for(Map.Entry<Timestamp, List<Integer>> entry : readings.entrySet()) {
             System.out.println("Key: " + entry.getKey().toLocalDateTime().toString() + " Value: " + entry.getValue().toString());
         }
+        listNodes(encoding);
+        String ticket = makeRequest("lobtios", "READINGS", encoding);
+        TimeUnit.SECONDS.sleep(10);
+        getRequest(ticket);
+
+
     }
 
 
