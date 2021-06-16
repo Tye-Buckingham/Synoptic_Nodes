@@ -43,14 +43,14 @@ Time keeping is done through the client upon connection and at regular intervals
 :CUSTOM_ID: readings
 :END:
 
-For this project the people of Lobitos and Piedritas are concered with their water supply noting sanity and the tapping of their pipes. Below are a list of sensors that can monitor these issues are report issues to help pin poiint the issue, reduce the time it takes to find and fix the issue, and help analyse persistant issues.
+For this project the people of Lobitos and Piedritas are concerned with their water supply noting sanity and the tapping of their pipes. Below are a list of sensors that can monitor these issues are report issues to help pin point the issue, reduce the time it takes to find and fix the issue, and help analyse persistent issues.
 
 Formatted [Turbidity, TDS, pressure, flow rate, pH, Temp] ::
 
 + Turbidity :: Measures the amount of light scattered through the water. This can describe the cleanliness of water as suspended or dissolved particles will reduce cleanliness.
 + TDS       :: TDS, or total dissolved solids, is the concentration of dissolved substances in the water and can determine how drinkable the water is.
 + Pressure  :: The pressure of water can determine the health of the pipes and valves of the water system but can also be a sign of the pipes being tapped.
-+ Flow rate :: Similar to pressure however, a very low flow rate but a high pressure can be symptomic of a blockage.
++ Flow rate :: Similar to pressure however, a very low flow rate but a high pressure can be symptomatic of a blockage.
 + pH        :: The pH of water is a key factor in determining how drinkable water is, and can also help determine what solvents may be present in the water.
 + Temp      :: Although testing specifically for bacteria in water can be a costly task (and not viable directly with sensors) a higher temperature can indicate the potential for bacterial growth.
 
@@ -75,9 +75,9 @@ This allows the server to tell the user if the request has not been made (or not
 *** Request and response formatting
 
 All data transferred between nodes is through a formatted string which can then be parsed within the JAVA program, full descriptions of formatting is described in the .java example.
-+ */time*'s TIME argument is formatted to the logging node such 'T[unix_timestamp]'
++ */time*'s TIME argument is formatted to the logging node such 'T[UNIX_timestamp]'
 + */get-request*'s response will be formatted such [ticket_number]:[data{timestamp,reading1,reading2,reading3}:{timestamp,reading1,reading2,reading3}] and needs a TICKET number. This saves the nodes time and memory when handling requests and leaves the parsing to the client.
-+ */check* will return a : sperated string of all current tickets being processed. 
++ */check* will return a : separated string of all current tickets being processed. 
 + */interval* requires a TIME argument formatted such T[interval_in_minutes]
 + */request* requires a NODE name and a BROADCAST type ([READINGS, SETTINGS, READ_ARCHIVE]), it will return a ticket number used in /get-request
 + */nodes*  requires no argument and will return a string formatted such ID:[node_id],Name:[node_name]
@@ -91,7 +91,7 @@ All data transferred between nodes is through a formatted string which can then 
 The client example is provided in Java but a web browser will work just fine. The client will need to authenticate with the stored username and password
 in order to make requests. The requests follow a standard HTTP request
 
-+ /time requires a unix timestamp with the argument named *TIME*
++ /time requires a UNIX timestamp with the argument named *TIME*
 #+begin_src java
 long ut1 = Instant.now().getEpochSecond();
 String time = "http://[server_node_IP]/time?TIME="+ut1;
@@ -102,7 +102,7 @@ String NODE = "lobitos";
 String BROADCAST = "READINGS";
 String request = "http://[server_node_IP]/request?NODE="+NODE+"&BROADCAST="+BROADCAST;
 #+end_src
-+ /get-request the user needs to store the reponse from the above request and provide this as the *TICKET* argument
++ /get-request the user needs to store the response from the above request and provide this as the *TICKET* argument
 #+begin_src java
 String get_request = "http://[server_node_IP]/get-request?TICKET="+TICKET;
 #+end_src
@@ -120,4 +120,4 @@ All responses are in 'text/plain' so the Java client can easily capture and read
 ** The following guides were used in research and development ::
 
 | [[https://randomnerdtutorials.com/esp32-esp8266-web-server-http-authentication/][WebServer with Auth]] | Tutorial showing how to setup an ESP web server authentication                             |
-| [[https://gitlab.com/painlessMesh/painlessMesh/-/blob/master/examples/][PainlessMesh]]        | Examples provided by the painlessMesh github used to build the web server and mesh network |
+| [[https://gitlab.com/painlessMesh/painlessMesh/-/blob/master/examples/][PainlessMesh]]        | Examples provided by the painlessMesh GitHub used to build the web server and mesh network |
